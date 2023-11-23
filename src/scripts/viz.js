@@ -57,13 +57,13 @@ function createGraph(nodes, edges, styles) {
     {
       selector: ".individual-node",
       style: {
-        width: 80,
-        height: 80,
-        "background-color": "dark-grey",
+        width: 50,
+        height: 50,
+        "background-color": "blue",
         label: "data(label)",
-        "text-valign": "center",
+        "text-valign": "top",
         "text-halign": "center",
-        "text-margin-y": "0px",
+        "text-margin-y": "-5px",
         "text-background-color": "#fff",
         "text-background-opacity": 0.0,
         "text-background-padding": "3px",
@@ -75,7 +75,7 @@ function createGraph(nodes, edges, styles) {
       style: {
         width: 80,
         height: 80,
-        "background-color": "dark-grey",
+        "background-color": "green",
         label: "data(label)",
         "text-valign": "center",
         "text-halign": "center",
@@ -83,23 +83,23 @@ function createGraph(nodes, edges, styles) {
         "text-background-color": "#fff",
         "text-background-opacity": 0.0,
         "text-background-padding": "3px",
-        shape: "circle",
+        shape: "rectangle",
       },
     },
     {
       selector: ".property-node",
       style: {
-        width: 80,
-        height: 80,
-        "background-color": "dark-grey",
+        width: 50,
+        height: 50,
+        "background-color": "red",
         label: "data(label)",
-        "text-valign": "center",
+        "text-valign": "bottom",
         "text-halign": "center",
-        "text-margin-y": "0px",
+        "text-margin-y": "10px",
         "text-background-color": "#fff",
         "text-background-opacity": 0.0,
         "text-background-padding": "3px",
-        shape: "circle",
+        shape: "triangle",
       },
     },
     {
@@ -180,48 +180,61 @@ function getData(server_uri) {
 }
 
 function processRawData(rawData) {
-  let allNodes = {};
+  let typeNodes = {};
+  let individualNodes = {};
+  let dataPropertyNodes = {};
+
+  let allNodes = [];
   let allEdges = [];
 
-  let individuals = rawData["individuals"];
+  const individuals = rawData["individuals"];
 
-  for (let i = 0; i < individuals.length; i++) {
-    let individual = individuals[i];
-    let uri = individual["uri"];
+  individuals.forEach((individual) => {
+    const uri = individual["uri"];
 
-    let individualNode = createNode(
+    const individualNode = createNode(
       getDisplayNameFromIRI(uri),
       "individual-node"
     );
-    allNodes[uri] = individualNode;
+    individualNodes[uri] = individualNode;
+    allNodes.push(individualNode);
 
-    let types = individual["types"];
+    const types = individual["types"];
     types.forEach((iri) => {
-      if (!(iri in allNodes)) {
-        let displayName = getDisplayNameFromIRI(iri);
-        let node = createNode(displayName, "type-node");
-        let edge = createEdge(individualNode, node, displayName);
+      const displayName = getDisplayNameFromIRI(iri);
 
-        allNodes[iri] = node;
-        allEdges.push(edge);
-      }
+      const typeIndividualNodes = { ...typeNodes, ...individualNodes };
+      const node = typeIndividualNodes.hasOwnProperty(iri)
+        ? typeIndividualNodes[iri]
+        : createNode(displayName, "type-node");
+
+      console.log(
+        `Creating edge between ${JSON.stringify(
+          individualNode
+        )} and ${JSON.stringify(node)}`
+      );
+
+      const edge = createEdge(individualNode, node, "isA");
+
+      typeNodes[iri] = node;
+
+      allNodes.push(node);
+      allEdges.push(edge);
     });
 
     let dataProperties = individual["data_properties"];
     Object.keys(dataProperties).forEach((iri) => {
-      let value = dataProperties[iri];
-      if (!(iri in allNodes)) {
-        let displayName = getDisplayNameFromIRI(iri);
-        let node = createNode(displayName, "property-node");
-        let edge = createEdge(individualNode, node, displayName);
+      const value = dataProperties[iri];
+      const displayName = getDisplayNameFromIRI(iri);
+      const node = createNode(value, "property-node");
+      const edge = createEdge(individualNode, node, displayName);
 
-        allNodes[iri] = node;
-        allEdges.push(edge);
-      }
+      allNodes.push(node);
+      allEdges.push(edge);
     });
 
     let objectProperties = individual["object_properties"];
-  }
+  });
 
   return { nodes: allNodes, edges: allEdges, styles: [] };
 }
