@@ -43,13 +43,15 @@ function createGraph(nodes, edges, styles) {
 
   elements = [];
 
-  Object.keys(nodes).forEach((node) => {
-    elements.push(node);
+  Object.keys(nodes).forEach((key) => {
+    elements.push(nodes[key]);
   });
 
-  Object.keys(edges).forEach((edge) => {
-    elements.push(edge);
+  Object.keys(edges).forEach((key) => {
+    elements.push(edges[key]);
   });
+
+  console.log(elements);
 
   style = [
     {
