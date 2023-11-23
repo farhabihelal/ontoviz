@@ -117,7 +117,11 @@ function createGraph(nodes, edges, styles) {
     },
   ];
   layout = {
-    name: "grid",
+    // name: "cose",
+    // name: "circle",
+    // name: "random",
+    name: "breadthfirst",
+    // name: "concentric",
   };
 
   var cy = cytoscape({
