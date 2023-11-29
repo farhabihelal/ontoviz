@@ -76,17 +76,39 @@ class Visualizer:
 
     def create_graph_node(self, graph: Digraph, node: dict):
         node_name = self.process_label(node["label"])
-        graph.node(id=node["id"], label=node_name, shape="ellipse")
+        graph.node(
+            id=node["id"],
+            name=node_name,
+            shape="ellipse",
+            penwidth="2",
+        )
 
     def create_graph_edge(self, graph: Digraph, edge: dict):
         graph.edge(
             self.process_label(edge["source"]["label"]),
             self.process_label(edge["target"]["label"]),
             label=edge["label"],
+            penwidth="1.3",
+        )
+
+    def get_element_type(self, graph_element: dict) -> str:
+        node_keys = ["id", "label", "type"]
+        edge_keys = ["id", "label", "source", "target"]
+        return (
+            "node"
+            if graph_element.keys() == node_keys
+            else "edge"
+            if graph_element.keys() == edge_keys
+            else ""
         )
 
     def process_label(self, raw_label: str) -> str:
-        return url_parse.quote(html.escape(raw_label))
+        return f'"{raw_label}"'
+        # return url_parse.quote(html.escape(raw_label))
+
+    def process_uri(self, uri: str) -> str:
+        ns, display_name = uri.split("#")
+        return display_name.strip()
 
 
 if __name__ == "__main__":
@@ -160,6 +182,49 @@ if __name__ == "__main__":
         },
     }
 
+    graph_data = {
+        "nodes": {
+            "n1": {"id": "n1", "label": "Individual 1", "type": "individual"},
+            "n2": {"id": "n2", "label": "Individual 2", "type": "individual"},
+            "n3": {"id": "n3", "label": "Individual 3", "type": "individual"},
+            "n4": {"id": "n4", "label": "100", "type": "data_property"},
+            "n5": {"id": "n5", "label": "Hello", "type": "data_property"},
+            "n6": {"id": "n6", "label": "Object", "type": "class"},
+        },
+        "edges": {
+            "e1": {
+                "id": "e1",
+                "source": {"id": "n1", "label": "Individual 1", "type": "individual"},
+                "target": {"id": "n6", "label": "Object", "type": "class"},
+                "label": "isA",
+            },
+            "e2": {
+                "id": "e2",
+                "source": {"id": "n1", "label": "Individual 1", "type": "individual"},
+                "target": {"id": "n4", "label": "100", "type": "data_property"},
+                "label": "hasMoney",
+            },
+            "e3": {
+                "id": "e3",
+                "source": {"id": "n2", "label": "Individual 2", "type": "individual"},
+                "target": {"id": "n6", "label": "Object", "type": "class"},
+                "label": "isA",
+            },
+            "e4": {
+                "id": "e3",
+                "source": {"id": "n3", "label": "Individual 3", "type": "individual"},
+                "target": {"id": "n6", "label": "Object", "type": "class"},
+                "label": "isA",
+            },
+            "e5": {
+                "id": "e3",
+                "source": {"id": "n2", "label": "Individual 2", "type": "individual"},
+                "target": {"id": "n5", "label": "Hello", "type": "data_property"},
+                "label": "says",
+            },
+        },
+    }
+
     config = {
         "icons_path": f"{base_dir}/icons",
         "render_path": f"{base_dir}/renders",
@@ -167,3 +232,4 @@ if __name__ == "__main__":
     }
 
     viz = Visualizer(config)
+    viz.create_graph(graph_data)
