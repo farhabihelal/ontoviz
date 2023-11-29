@@ -244,10 +244,10 @@ function processRawData(rawData) {
 }
 
 function updateLoop() {
-  // data = getData();
-  // processedData = processRawData(data);
-  // createGraph(processedData.nodes, processedData.edges, processedData.styles);
+  let processedData = getData(queryServerUri);
+  createGraph(processedData.nodes, processedData.edges, processedData.styles);
 }
 
+var queryServerUri = "http://localhost:8880";
 var intervalDuration = 2000;
 var intervalId = setInterval(updateLoop, intervalDuration);

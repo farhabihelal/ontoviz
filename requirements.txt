@@ -1,0 +1,6 @@
+black
+rich
+Flask
+ruff
+requests
+graphviz
