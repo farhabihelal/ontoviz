@@ -139,21 +139,29 @@ document.addEventListener("DOMContentLoaded", () => {
         uri: "http://ontology.com#Person-Farhabi",
         types: ["http://ontology.com#Person"],
         data_properties: {
-          "http://ontology.com#hasId": "0",
-          "http://ontology.com#hasName": "Farhabi",
-          "http://ontology.com#hasAge": "30",
+          "http://ontology.com#hasId": ["0"],
+          "http://ontology.com#hasName": ["Farhabi"],
+          "http://ontology.com#hasAge": ["30"],
         },
-        object_properties: [],
+        object_properties: {
+          "http://ontology.com#hasSupervisor": [
+            "http://ontology.com#Person-Randy",
+          ],
+        },
       },
       {
         uri: "http://ontology.com#Person-Randy",
         types: ["http://ontology.com#Person"],
         data_properties: {
-          "http://ontology.com#hasId": "1",
-          "http://ontology.com#hasName": "Randy",
-          "http://ontology.com#hasAge": "50",
+          "http://ontology.com#hasId": ["1"],
+          "http://ontology.com#hasName": ["Randy"],
+          "http://ontology.com#hasAge": ["50"],
         },
-        object_properties: [],
+        object_properties: {
+          "http://ontology.com#supervises": [
+            "http://ontology.com#Person-Farhabi",
+          ],
+        },
       },
     ],
   };
@@ -163,8 +171,8 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function getData(server_uri) {
-  fetch(`https://${server_uri}/kb/list`, {
-    method: "GET",
+  return fetch(`${server_uri}/kb/list`, {
+    method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({
       query_type: "300",
@@ -177,7 +185,6 @@ function getData(server_uri) {
 
       return response.json();
     })
-    .then(processRawData)
     .catch(function (error) {
       console.error("Fetch error:", error);
     });
@@ -196,10 +203,9 @@ function processRawData(rawData) {
   individuals.forEach((individual) => {
     const uri = individual["uri"];
 
-    const individualNode = createNode(
-      getDisplayNameFromIRI(uri),
-      "individual-node"
-    );
+    const individualNode = individualNodes.hasOwnProperty(uri)
+      ? individualNodes[uri]
+      : createNode(getDisplayNameFromIRI(uri), "individual-node");
     individualNodes[uri] = individualNode;
     allNodes.push(individualNode);
 
@@ -228,26 +234,45 @@ function processRawData(rawData) {
 
     let dataProperties = individual["data_properties"];
     Object.keys(dataProperties).forEach((iri) => {
-      const value = dataProperties[iri];
-      const displayName = getDisplayNameFromIRI(iri);
-      const node = createNode(value, "property-node");
-      const edge = createEdge(individualNode, node, displayName);
+      for (let i = 0; i < dataProperties[iri].length; i++) {
+        const value = dataProperties[iri][i];
+        const displayName = getDisplayNameFromIRI(iri);
+        console.log(`${displayName} : ${value}`);
+        const node = createNode(value, "property-node");
+        const edge = createEdge(individualNode, node, displayName);
 
-      allNodes.push(node);
-      allEdges.push(edge);
+        allNodes.push(node);
+        allEdges.push(edge);
+      }
     });
 
     let objectProperties = individual["object_properties"];
+    Object.keys(objectProperties).forEach((iri) => {
+      for (let i = 0; i < objectProperties[iri].length; i++) {
+        const value = objectProperties[iri][i];
+        const displayName = getDisplayNameFromIRI(iri);
+        console.log(`${displayName} : ${value}`);
+        const objectNode = individualNodes.hasOwnProperty(value)
+          ? individualNodes[value]
+          : createNode(value, "individual-node");
+        const edge = createEdge(individualNode, objectNode, displayName);
+
+        allEdges.push(edge);
+      }
+    });
   });
 
   return { nodes: allNodes, edges: allEdges, styles: [] };
 }
 
-function updateLoop() {
-  let processedData = getData(queryServerUri);
+async function updateLoop() {
+  let rawData = await getData(queryServerUri);
+  console.log(rawData);
+  let processedData = processRawData(rawData);
+  console.log(processedData);
   createGraph(processedData.nodes, processedData.edges, processedData.styles);
 }
 
 var queryServerUri = "http://localhost:8880";
-var intervalDuration = 2000;
-var intervalId = setInterval(updateLoop, intervalDuration);
+var intervalDuration = 5000;
+// var intervalId = setInterval(updateLoop, intervalDuration);
