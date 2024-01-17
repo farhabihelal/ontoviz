@@ -24,20 +24,6 @@ function createEdge(source, target, label) {
   };
 }
 
-function getDisplayNameFromIRI(iri) {
-  let displayName = "";
-
-  let split = iri.split("#");
-
-  if (split.length == 1) {
-    displayName = split[0];
-  } else if (split.length == 2) {
-    displayName = split[1];
-  }
-
-  return displayName;
-}
-
 function createGraph(nodes, edges, styles) {
   container = document.getElementById("cy");
 
@@ -139,9 +125,15 @@ document.addEventListener("DOMContentLoaded", () => {
         uri: "http://ontology.com#Person-Farhabi",
         types: ["http://ontology.com#Person"],
         data_properties: {
-          "http://ontology.com#hasId": ["0"],
-          "http://ontology.com#hasName": ["Farhabi"],
-          "http://ontology.com#hasAge": ["30"],
+          "http://ontology.com#hasId": [
+            '"0"^^http://www.w3.org/2001/XMLSchema#integer',
+          ],
+          "http://ontology.com#hasName": [
+            '"Farhabi"^^http://www.w3.org/2001/XMLSchema#string',
+          ],
+          "http://ontology.com#hasAge": [
+            '"30"^^http://www.w3.org/2001/XMLSchema#integer',
+          ],
         },
         object_properties: {
           "http://ontology.com#hasSupervisor": [
@@ -153,9 +145,15 @@ document.addEventListener("DOMContentLoaded", () => {
         uri: "http://ontology.com#Person-Randy",
         types: ["http://ontology.com#Person"],
         data_properties: {
-          "http://ontology.com#hasId": ["1"],
-          "http://ontology.com#hasName": ["Randy"],
-          "http://ontology.com#hasAge": ["50"],
+          "http://ontology.com#hasId": [
+            '"1"^^http://www.w3.org/2001/XMLSchema#integer',
+          ],
+          "http://ontology.com#hasName": [
+            '"Randy"^^http://www.w3.org/2001/XMLSchema#string',
+          ],
+          "http://ontology.com#hasAge": [
+            '"50"^^http://www.w3.org/2001/XMLSchema#integer',
+          ],
         },
         object_properties: {
           "http://ontology.com#supervises": [
@@ -193,24 +191,39 @@ function getData(server_uri) {
 function processRawData(rawData) {
   let typeNodes = {};
   let individualNodes = {};
-  let dataPropertyNodes = {};
 
   let allNodes = [];
   let allEdges = [];
 
   const individuals = rawData["individuals"];
 
+  // Create all the individual nodes first
   individuals.forEach((individual) => {
     const uri = individual["uri"];
+
+    // Skip if not an IRI
+    if (!isIRI(uri)) {
+      return;
+    }
 
     const individualNode = individualNodes.hasOwnProperty(uri)
       ? individualNodes[uri]
       : createNode(getDisplayNameFromIRI(uri), "individual-node");
     individualNodes[uri] = individualNode;
     allNodes.push(individualNode);
+  });
+
+  // Handle all individual nodes
+  individuals.forEach((individual) => {
+    const uri = individual["uri"];
+    const individualNode = individualNodes[uri];
 
     const types = individual["types"];
     types.forEach((iri) => {
+      // Skip if not an IRI
+      if (!isIRI(iri)) {
+        return;
+      }
       const displayName = getDisplayNameFromIRI(iri);
 
       const typeIndividualNodes = { ...typeNodes, ...individualNodes };
@@ -235,8 +248,9 @@ function processRawData(rawData) {
     let dataProperties = individual["data_properties"];
     Object.keys(dataProperties).forEach((iri) => {
       for (let i = 0; i < dataProperties[iri].length; i++) {
-        const value = dataProperties[iri][i];
         const displayName = getDisplayNameFromIRI(iri);
+        const rawValue = dataProperties[iri][i];
+        const { value, type } = parseDataProperty(rawValue);
         console.log(`${displayName} : ${value}`);
         const node = createNode(value, "property-node");
         const edge = createEdge(individualNode, node, displayName);
@@ -275,4 +289,4 @@ async function updateLoop() {
 
 var queryServerUri = "http://localhost:8880";
 var intervalDuration = 5000;
-// var intervalId = setInterval(updateLoop, intervalDuration);
+var intervalId = setInterval(updateLoop, intervalDuration);
