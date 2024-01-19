@@ -43,13 +43,13 @@ function createGraph(nodes, edges, styles) {
     {
       selector: ".individual-node",
       style: {
-        width: 50,
-        height: 50,
+        width: 70,
+        height: 70,
         "background-color": "blue",
         label: "data(label)",
-        "text-valign": "top",
+        "text-valign": "bottom",
         "text-halign": "center",
-        "text-margin-y": "-5px",
+        "text-margin-y": "10px",
         "text-background-color": "#fff",
         "text-background-opacity": 0.0,
         "text-background-padding": "3px",
@@ -59,13 +59,13 @@ function createGraph(nodes, edges, styles) {
     {
       selector: ".type-node",
       style: {
-        width: 80,
-        height: 80,
+        width: 50,
+        height: 50,
         "background-color": "green",
         label: "data(label)",
-        "text-valign": "center",
+        "text-valign": "bottom",
         "text-halign": "center",
-        "text-margin-y": "0px",
+        "text-margin-y": "10px",
         "text-background-color": "#fff",
         "text-background-opacity": 0.0,
         "text-background-padding": "3px",
@@ -155,11 +155,7 @@ document.addEventListener("DOMContentLoaded", () => {
             '"50"^^http://www.w3.org/2001/XMLSchema#integer',
           ],
         },
-        object_properties: {
-          "http://ontology.com#supervises": [
-            "http://ontology.com#Person-Farhabi",
-          ],
-        },
+        object_properties: {},
       },
     ],
   };
@@ -279,14 +275,36 @@ function processRawData(rawData) {
   return { nodes: allNodes, edges: allEdges, styles: [] };
 }
 
-async function updateLoop() {
-  let rawData = await getData(queryServerUri);
-  console.log(rawData);
-  let processedData = processRawData(rawData);
-  console.log(processedData);
-  createGraph(processedData.nodes, processedData.edges, processedData.styles);
+async function getHash(inputString) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(inputString);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+
+  // Convert the hashBuffer to a hexadecimal string
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+
+  return hashHex;
 }
 
-var queryServerUri = "http://localhost:8880";
-var intervalDuration = 5000;
-var intervalId = setInterval(updateLoop, intervalDuration);
+async function updateLoop() {
+  let rawData = await getData(queryServerUri);
+  console.log(`rawData: ${rawData}`);
+
+  if (
+    rawData != null &&
+    getHash(JSON.stringify(rawData)) != getHash(JSON.stringify(lastRawData))
+  ) {
+    console.log("Data has changed!");
+    updateGraph(rawData);
+  }
+}
+
+function updateGraph(rawData) {
+  let processedData = processRawData(rawData);
+  console.log(`processedData: ${processedData}`);
+  createGraph(processedData.nodes, processedData.edges, processedData.styles);
+  lastRawData = rawData;
+}
