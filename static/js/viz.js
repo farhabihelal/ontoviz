@@ -4,10 +4,10 @@ function generateUUID() {
   return array.join("-");
 }
 
-function createNode(label, style) {
+function createNode(id, label, style) {
   return {
     data: {
-      id: generateUUID(),
+      id: id,
       label: label,
     },
     classes: style,
@@ -119,6 +119,10 @@ function createGraph(nodes, edges, styles) {
     // name: "cose",
     // name: "circle",
     // name: "random",
+    // name: "avsdf",
+    // name: "dagre",
+    // name: "elk",
+    // name: "cola",
     name: "breadthfirst",
     // name: "concentric",
   };
@@ -198,16 +202,17 @@ function getData(server_uri) {
 }
 
 function processRawData(rawData) {
-  let typeNodes = {};
+  // let typeNodes = {};
   let individualNodes = {};
 
-  let allNodes = [];
+  let allNodes = {};
   let allEdges = [];
 
   const individuals = rawData["individuals"];
+  const filteredIndividuals = filterIndividuals(rawData);
 
   // Create all the individual nodes first
-  individuals.forEach((individual) => {
+  filteredIndividuals.forEach((individual) => {
     const uri = individual["uri"];
 
     // Skip if not an IRI
@@ -217,13 +222,13 @@ function processRawData(rawData) {
 
     const individualNode = individualNodes.hasOwnProperty(uri)
       ? individualNodes[uri]
-      : createNode(getDisplayNameFromIRI(uri), "individual-node");
+      : createNode(uri, getDisplayNameFromIRI(uri), "individual-node");
     individualNodes[uri] = individualNode;
-    allNodes.push(individualNode);
+    allNodes[uri] = individualNode;
   });
 
   // Handle all individual nodes
-  individuals.forEach((individual) => {
+  filteredIndividuals.forEach((individual) => {
     const uri = individual["uri"];
     const individualNode = individualNodes[uri];
 
@@ -235,10 +240,10 @@ function processRawData(rawData) {
       }
       const displayName = getDisplayNameFromIRI(iri);
 
-      const typeIndividualNodes = { ...typeNodes, ...individualNodes };
-      const node = typeIndividualNodes.hasOwnProperty(iri)
-        ? typeIndividualNodes[iri]
-        : createNode(displayName, "type-node");
+      // const typeIndividualNodes = { ...typeNodes, ...individualNodes };
+      const node = individualNodes.hasOwnProperty(iri)
+        ? individualNodes[iri]
+        : createNode(iri, displayName, "type-node");
 
       console.log(
         `Creating edge between ${JSON.stringify(
@@ -248,9 +253,9 @@ function processRawData(rawData) {
 
       const edge = createEdge(individualNode, node, "isA");
 
-      typeNodes[iri] = node;
+      // typeNodes[iri] = node;
 
-      allNodes.push(node);
+      allNodes[iri] = node;
       allEdges.push(edge);
     });
 
@@ -261,10 +266,10 @@ function processRawData(rawData) {
         const rawValue = dataProperties[iri][i];
         const { value, type } = parseDataProperty(rawValue);
         console.log(`${displayName} : ${value}`);
-        const node = createNode(value, "property-node");
+        const node = createNode(iri, value, "property-node");
         const edge = createEdge(individualNode, node, displayName);
 
-        allNodes.push(node);
+        allNodes[iri] = node;
         allEdges.push(edge);
       }
     });
@@ -275,17 +280,17 @@ function processRawData(rawData) {
         const value = objectProperties[iri][i];
         const displayName = getDisplayNameFromIRI(iri);
         console.log(`${displayName} : ${value}`);
-        const objectNode = individualNodes.hasOwnProperty(value)
+        const node = individualNodes.hasOwnProperty(value)
           ? individualNodes[value]
-          : createNode(value, "individual-node");
-        const edge = createEdge(individualNode, objectNode, displayName);
+          : createNode(iri, value, "individual-node");
+        const edge = createEdge(individualNode, node, displayName);
 
         allEdges.push(edge);
       }
     });
   });
 
-  return { nodes: allNodes, edges: allEdges, styles: [] };
+  return { nodes: Object.values(allNodes), edges: allEdges, styles: [] };
 }
 
 async function getHash(inputString) {
@@ -303,21 +308,64 @@ async function getHash(inputString) {
 }
 
 async function updateLoop() {
+  const queryServerUri = "http://localhost:8880";
   let rawData = await getData(queryServerUri);
   console.log(`rawData: ${rawData}`);
-
-  if (
-    rawData != null &&
-    getHash(JSON.stringify(rawData)) != getHash(JSON.stringify(lastRawData))
-  ) {
-    console.log("Data has changed!");
-    updateGraph(rawData);
-  }
+  updateGraph(rawData);
+  // if (
+  //   rawData != null &&
+  //   getHash(JSON.stringify(rawData)) != getHash(JSON.stringify(lastRawData))
+  // ) {
+  //   console.log("Data has changed!");
+  //   updateGraph(rawData);
+  // }
 }
 
 function updateGraph(rawData) {
-  let processedData = processRawData(rawData);
+  const processedData = processRawData(rawData);
   console.log(`processedData: ${processedData}`);
   createGraph(processedData.nodes, processedData.edges, processedData.styles);
   lastRawData = rawData;
 }
+
+function filterIndividuals(rawData) {
+  const individuals = rawData["individuals"];
+
+  filteredIndividuals = {};
+
+  individuals.forEach((individual) => {
+    const uri = individual["uri"];
+    const types = individual["types"];
+    const objectProperties = individual["object_properties"];
+
+    types.forEach((typeIRI) => {
+      if (typeIRI === "http://www.hri-em.org/haru/kb/tof.owl#Person") {
+        filteredIndividuals[uri] = individual;
+
+        function addObjectProperties(objectProperties) {
+          Object.keys(objectProperties).forEach((property) => {
+            objectProperties[property].forEach((objIRI) => {
+              if (!filteredIndividuals.hasOwnProperty(objIRI)) {
+                individuals.forEach((objectIndividual) => {
+                  if (objectIndividual["uri"] === objIRI) {
+                    filteredIndividuals[objIRI] = objectIndividual;
+                    addObjectProperties(objectIndividual["object_properties"]);
+                  }
+                });
+              }
+            });
+          });
+        }
+
+        addObjectProperties(objectProperties);
+      }
+    });
+  });
+
+  return Object.values(filteredIndividuals);
+}
+
+(() => {
+  const refreshInterval = 5000;
+  setInterval(updateLoop, refreshInterval);
+})();
