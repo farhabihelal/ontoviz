@@ -1,3 +1,5 @@
+var graph = null;
+
 function generateUUID() {
   const array = new Uint32Array(4);
   window.crypto.getRandomValues(array);
@@ -24,7 +26,7 @@ function createEdge(source, target, label) {
   };
 }
 
-function createGraph(nodes, edges, styles) {
+function createGraph(nodes, edges) {
   container = document.getElementById("cy");
 
   elements = [];
@@ -37,7 +39,7 @@ function createGraph(nodes, edges, styles) {
     elements.push(edges[key]);
   });
 
-  console.log(elements);
+  console.log(`elements : ${elements}`);
 
   style = [
     {
@@ -127,7 +129,7 @@ function createGraph(nodes, edges, styles) {
     // name: "concentric",
   };
 
-  var cy = cytoscape({
+  graph = cytoscape({
     container: container,
     elements: elements,
     style: style,
@@ -135,6 +137,23 @@ function createGraph(nodes, edges, styles) {
     // zoom: { duration: 1000, easing: "ease-in-out" },
     // pan: { duration: 1000 },
   });
+}
+
+function updateGraph(nodes, edges, styles) {
+  elements = [];
+
+  Object.keys(nodes).forEach((key) => {
+    elements.push(nodes[key]);
+  });
+
+  Object.keys(edges).forEach((key) => {
+    elements.push(edges[key]);
+  });
+
+  console.log(elements);
+
+  graph.json({ elements: elements });
+  graph.layout({ name: "breadthfirst" }).run();
 }
 
 function test() {
@@ -180,12 +199,13 @@ function test() {
   };
 
   let processedData = processRawData(data);
-  createGraph(processedData.nodes, processedData.edges, processedData.styles);
+  updateGraph(processedData.nodes, processedData.edges, processedData.styles);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  createGraph([], []);
   // test();
-  updateLoop();
+  run();
 });
 
 function getData(server_uri) {
@@ -314,11 +334,11 @@ async function getHash(inputString) {
   return hashHex;
 }
 
-async function updateLoop() {
+async function run() {
   const queryServerUri = "http://localhost:8880";
   let rawData = await getData(queryServerUri);
   console.log(`rawData: ${rawData}`);
-  updateGraph(rawData);
+  update(rawData);
   // if (
   //   rawData != null &&
   //   getHash(JSON.stringify(rawData)) != getHash(JSON.stringify(lastRawData))
@@ -328,10 +348,11 @@ async function updateLoop() {
   // }
 }
 
-function updateGraph(rawData) {
+function update(rawData) {
   const processedData = processRawData(rawData);
   console.log(`processedData: ${processedData}`);
-  createGraph(processedData.nodes, processedData.edges, processedData.styles);
+  updateGraph(processedData.nodes, processedData.edges, processedData.styles);
+
   lastRawData = rawData;
 }
 
@@ -373,6 +394,6 @@ function filterIndividuals(rawData) {
 }
 
 (() => {
-  const refreshInterval = 5000;
-  setInterval(updateLoop, refreshInterval);
+  const refreshInterval = 3000;
+  setInterval(run, refreshInterval);
 })();
