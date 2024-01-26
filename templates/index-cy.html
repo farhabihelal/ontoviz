@@ -17,8 +17,41 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     ></script>
+
+    <!-- <script src="https://cdn.jsdelivr.net/npm/cytoscape-cose@3.2.0/dist/cytoscape-cose.min.js"></script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/cytoscape-dagre@2.3.0/dist/cytoscape-dagre.min.js"></script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/cytoscape-cola@2.3.0/dist/cytoscape-cola.min.js"></script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/cytoscape-spread@2.3.0/dist/cytoscape-spread.min.js"></script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/cytoscape-random@2.3.0/dist/cytoscape-random.min.js"></script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/cytoscape-preset@2.3.0/dist/cytoscape-preset.min.js"></script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/cytoscape-euler@2.3.0/dist/cytoscape-euler.min.js"></script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/cytoscape-klay@2.3.0/dist/cytoscape-klay.min.js"></script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/cytoscape-avsdf/cytoscape-avsdf.min.js"></script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/cytoscape-elk/dist/cytoscape-elk.min.js"></script> -->
   </head>
   <body>
+    <div id="legend">
+      <h3 class="legend-title">Legend</h3>
+      <div class="legend-item">
+        <div class="shape rectangle"></div>
+        Class
+      </div>
+      <div class="legend-item">
+        <div class="shape circle"></div>
+        Individual
+      </div>
+      <div class="legend-item">
+        <svg
+          class="shape triangle-svg"
+          viewBox="0 0 10 10"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <polygon points="0,10 5,0 10,10" />
+        </svg>
+        Property
+      </div>
+    </div>
+
     <div id="cy"></div>
     <script src="{{ url_for('static', filename='js/utils.js') }}"></script>
     <script src="{{ url_for('static', filename='js/ontology.js') }}"></script>

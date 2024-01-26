@@ -132,6 +132,8 @@ function createGraph(nodes, edges, styles) {
     elements: elements,
     style: style,
     layout: layout,
+    // zoom: { duration: 1000, easing: "ease-in-out" },
+    // pan: { duration: 1000 },
   });
 }
 
