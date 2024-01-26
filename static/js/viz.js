@@ -137,7 +137,7 @@ function createGraph(nodes, edges, styles) {
   });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+function test() {
   data = {
     individuals: [
       {
@@ -181,6 +181,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let processedData = processRawData(data);
   createGraph(processedData.nodes, processedData.edges, processedData.styles);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  // test();
+  updateLoop();
 });
 
 function getData(server_uri) {
