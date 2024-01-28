@@ -1,4 +1,5 @@
 var graph = null;
+var enableTest = false;
 
 function generateUUID() {
   const array = new Uint32Array(4);
@@ -156,40 +157,40 @@ function updateGraph(nodes, edges, styles) {
   graph.layout({ name: "breadthfirst" }).run();
 }
 
-function test() {
+function getTestData() {
   data = {
     individuals: [
       {
-        uri: "http://ontology.com#Person-Farhabi",
-        types: ["http://ontology.com#Person"],
+        uri: "http://www.hri-em.org/haru/kb/tof.owl#Farhabi",
+        types: ["http://www.hri-em.org/haru/kb/tof.owl#Person"],
         data_properties: {
-          "http://ontology.com#hasId": [
+          "http://www.hri-em.org/haru/kb/tof.owl#hasId": [
             '"0"^^http://www.w3.org/2001/XMLSchema#integer',
           ],
-          "http://ontology.com#hasName": [
+          "http://www.hri-em.org/haru/kb/tof.owl#hasName": [
             '"Farhabi"^^http://www.w3.org/2001/XMLSchema#string',
           ],
-          "http://ontology.com#hasAge": [
+          "http://www.hri-em.org/haru/kb/tof.owl#hasAge": [
             '"30"^^http://www.w3.org/2001/XMLSchema#integer',
           ],
         },
         object_properties: {
-          "http://ontology.com#hasSupervisor": [
-            "http://ontology.com#Person-Randy",
+          "http://www.hri-em.org/haru/kb/tof.owl#hasSupervisor": [
+            "http://www.hri-em.org/haru/kb/tof.owl#Randy",
           ],
         },
       },
       {
-        uri: "http://ontology.com#Person-Randy",
-        types: ["http://ontology.com#Person"],
+        uri: "http://www.hri-em.org/haru/kb/tof.owl#Randy",
+        types: ["http://www.hri-em.org/haru/kb/tof.owl#Person"],
         data_properties: {
-          "http://ontology.com#hasId": [
+          "http://www.hri-em.org/haru/kb/tof.owl#hasId": [
             '"1"^^http://www.w3.org/2001/XMLSchema#integer',
           ],
-          "http://ontology.com#hasName": [
+          "http://www.hri-em.org/haru/kb/tof.owl#hasName": [
             '"Randy"^^http://www.w3.org/2001/XMLSchema#string',
           ],
-          "http://ontology.com#hasAge": [
+          "http://www.hri-em.org/haru/kb/tof.owl#hasAge": [
             '"50"^^http://www.w3.org/2001/XMLSchema#integer',
           ],
         },
@@ -198,15 +199,8 @@ function test() {
     ],
   };
 
-  let processedData = processRawData(data);
-  updateGraph(processedData.nodes, processedData.edges, processedData.styles);
+  return data;
 }
-
-document.addEventListener("DOMContentLoaded", () => {
-  createGraph([], []);
-  // test();
-  run();
-});
 
 function getData(server_uri) {
   return fetch(`${server_uri}/kb/list`, {
@@ -293,10 +287,11 @@ function processRawData(rawData) {
         const rawValue = dataProperties[iri][i];
         const { value, type } = parseDataProperty(rawValue);
         console.log(`${displayName} : ${value}`);
-        const node = createNode(iri, value, "property-node");
+        const nodeId = `${uri}-${iri}-${value}`;
+        const node = createNode(nodeId, value, "property-node");
         const edge = createEdge(individualNode, node, displayName);
 
-        allNodes[iri] = node;
+        allNodes[nodeId] = node;
         allEdges.push(edge);
       }
     });
@@ -336,7 +331,7 @@ async function getHash(inputString) {
 
 async function run() {
   const queryServerUri = "http://localhost:8880";
-  let rawData = await getData(queryServerUri);
+  let rawData = enableTest ? getTestData() : await getData(queryServerUri);
   console.log(`rawData: ${rawData}`);
   update(rawData);
   // if (

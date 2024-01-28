@@ -8,6 +8,17 @@ body {
   display: block;
 }
 
+#test-mode {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background-color: white;
+  text-align: center;
+  font-family: sans-serif;
+  font-size: 16px;
+  z-index: 1;
+}
+
 #legend {
   position: absolute;
   top: 20px;
