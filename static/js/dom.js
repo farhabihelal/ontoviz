@@ -1,7 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
   reset();
-  createGraph([], []);
-  run();
 });
 
 document
@@ -11,9 +9,17 @@ document
     event.stopPropagation();
 
     enableTest = !enableTest;
-    run();
+    refresh();
   });
 
 function reset() {
+  console.log("Reseting ...");
   document.getElementById("switch-test-mode").checked = false;
+  refresh();
+}
+
+function refresh() {
+  console.log("Refreshing ...");
+  resetGraph();
+  run();
 }

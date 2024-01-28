@@ -1,5 +1,6 @@
 var graph = null;
 var enableTest = false;
+var lastRawData = null;
 
 function generateUUID() {
   const array = new Uint32Array(4);
@@ -333,14 +334,14 @@ async function run() {
   const queryServerUri = "http://localhost:8880";
   let rawData = enableTest ? getTestData() : await getData(queryServerUri);
   console.log(`rawData: ${rawData}`);
+
+  if (!hasDataChanged(lastRawData, rawData)) {
+    console.log("No change in data. Skipping graph update.");
+    return;
+  }
+
+  console.log("Data has changed! Updating graph.");
   update(rawData);
-  // if (
-  //   rawData != null &&
-  //   getHash(JSON.stringify(rawData)) != getHash(JSON.stringify(lastRawData))
-  // ) {
-  //   console.log("Data has changed!");
-  //   updateGraph(rawData);
-  // }
 }
 
 function update(rawData) {
@@ -389,6 +390,38 @@ function filterIndividuals(rawData) {
 }
 
 (() => {
-  const refreshInterval = 3000;
-  setInterval(run, refreshInterval);
+  const refreshIntervalMs = 1000;
+  setInterval(run, refreshIntervalMs);
 })();
+
+function sortData(data) {
+  if (typeof data !== "object" || data === null) {
+    return data;
+  }
+
+  if (Array.isArray(data)) {
+    return data.map(sortData);
+  }
+
+  const sortedKeys = Object.keys(data).sort();
+  const sortedData = {};
+
+  sortedKeys.forEach((key) => {
+    sortedData[key] = sortData(data[key]);
+  });
+
+  return sortedData;
+}
+
+function hasDataChanged(oldData, newData) {
+  return (
+    oldData === null ||
+    JSON.stringify(sortData(oldData)) !== JSON.stringify(sortData(newData))
+  );
+}
+
+function resetGraph() {
+  console.log("Reseting graph...");
+  graph ? updateGraph([], [], []) : createGraph([], []);
+  lastRawData = null;
+}
