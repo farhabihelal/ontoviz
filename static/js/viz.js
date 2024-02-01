@@ -1,6 +1,7 @@
 var graph = null;
 var enableTest = false;
 var lastRawData = null;
+var style = vizualizationStyleProfiles["tv"];
 
 function generateUUID() {
   const array = new Uint32Array(4);
@@ -28,7 +29,7 @@ function createEdge(source, target, label) {
   };
 }
 
-function createGraph(nodes, edges) {
+function createGraph(nodes, edges, style) {
   container = document.getElementById("cy");
 
   elements = [];
@@ -43,81 +44,6 @@ function createGraph(nodes, edges) {
 
   console.log(`elements : ${elements}`);
 
-  style = [
-    {
-      selector: ".individual-node",
-      style: {
-        width: 70,
-        height: 70,
-        "background-color": "blue",
-        label: "data(label)",
-        "text-valign": "bottom",
-        "text-halign": "center",
-        "text-margin-y": "10px",
-        "text-background-color": "#fff",
-        "text-background-opacity": 0.0,
-        "text-background-padding": "3px",
-        "font-family": "Arial, sans-serif",
-        "font-size": "24px",
-        shape: "circle",
-      },
-    },
-    {
-      selector: ".type-node",
-      style: {
-        width: 50,
-        height: 50,
-        "background-color": "green",
-        label: "data(label)",
-        "text-valign": "bottom",
-        "text-halign": "center",
-        "text-margin-y": "10px",
-        "text-background-color": "#fff",
-        "text-background-opacity": 0.0,
-        "text-background-padding": "3px",
-        "font-family": "Arial, sans-serif",
-        "font-size": "28px",
-        shape: "rectangle",
-      },
-    },
-    {
-      selector: ".property-node",
-      style: {
-        width: 50,
-        height: 50,
-        "background-color": "red",
-        label: "data(label)",
-        "text-valign": "bottom",
-        "text-halign": "center",
-        "text-margin-y": "10px",
-        "text-background-color": "#fff",
-        "text-background-opacity": 0.0,
-        "text-background-padding": "3px",
-        "font-family": "Arial, sans-serif",
-        "font-size": "24px",
-        shape: "triangle",
-      },
-    },
-    {
-      selector: "edge",
-      style: {
-        width: 3,
-        "line-color": "#ccc",
-        "target-arrow-color": "#ccc",
-        "target-arrow-shape": "triangle",
-        "curve-style": "bezier",
-        label: "data(label)", // Set label on the edge
-        "source-endpoint": "outside-to-line",
-        "target-endpoint": "outside-to-line",
-        "arrow-scale": 2,
-        "text-background-color": "#fff",
-        "text-background-opacity": 0.7,
-        "text-background-padding": "3px",
-        "font-family": "Arial, sans-serif",
-        "font-size": "20px",
-      },
-    },
-  ];
   layout = {
     // name: "grid",
     // name: "cose",
@@ -390,7 +316,7 @@ function filterIndividuals(rawData) {
 }
 
 (() => {
-  const refreshIntervalMs = 1000;
+  const refreshIntervalMs = 3000;
   setInterval(run, refreshIntervalMs);
 })();
 
@@ -422,6 +348,6 @@ function hasDataChanged(oldData, newData) {
 
 function resetGraph() {
   console.log("Reseting graph...");
-  graph ? updateGraph([], [], []) : createGraph([], []);
+  graph ? updateGraph([], [], []) : createGraph([], [], style.style);
   lastRawData = null;
 }
