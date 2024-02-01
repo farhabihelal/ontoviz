@@ -65,6 +65,44 @@ function createGraph(nodes, edges, style) {
     // zoom: { duration: 1000, easing: "ease-in-out" },
     // pan: { duration: 1000 },
   });
+
+  // Event listener for node click
+  graph.on("click", "node", function (event) {
+    const clickedNode = event.target;
+
+    // Remove highlight from previously clicked elements
+    graph.elements().removeClass("highlighted");
+
+    // Highlight the clicked node
+    clickedNode.addClass("highlighted");
+
+    // Highlight connected edges
+    clickedNode.connectedEdges().addClass("highlighted");
+
+    // Highlight connected nodes
+    clickedNode.connectedEdges().connectedNodes().addClass("highlighted");
+
+    // Styles for the highlighted elements
+    graph
+      .style()
+      .selector(".highlighted")
+      .css({
+        // "background-color": "yellow", // Change this to the desired background color
+        "line-color": "red", // Change this to the desired line color for edges
+        "border-color": "red", // Change this to the desired border color for nodes
+        "border-width": "8px", // Change this to the desired border width for nodes
+      })
+      .update();
+  });
+
+  // Event listener for canvas tap
+  graph.on("tap", function (event) {
+    // Check if the tap event target is the canvas (not a node)
+    if (event.target === graph) {
+      // Reset styles or perform other actions for all nodes
+      graph.elements().removeClass("highlighted");
+    }
+  });
 }
 
 function updateGraph(nodes, edges, styles) {

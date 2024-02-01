@@ -119,7 +119,7 @@ var vizualizationStyleProfiles = {
         style: {
           width: 140,
           height: 140,
-          "background-color": "red",
+          "background-color": "rgb(255, 200, 0)",
           label: "data(label)",
           "text-valign": "bottom",
           "text-halign": "center",
