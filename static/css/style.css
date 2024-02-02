@@ -70,3 +70,12 @@ body {
   height: 50px;
   fill: rgb(255, 200, 0);
 }
+
+#credits {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  font-size: 24px;
+  color: #999;
+  z-index: 1;
+}
