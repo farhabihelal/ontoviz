@@ -160,6 +160,7 @@ var vizualizationStyleProfiles = {
           "text-background-color": "red", // Change this to the desired text background color for nodes
           opacity: "1", // Change this to the desired opacity for nodes
           "target-arrow-color": "red",
+          "font-weight": "bold",
         },
       },
       {
