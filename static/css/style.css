@@ -24,16 +24,14 @@ body {
   top: 20px;
   right: 20px;
   background-color: white;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  padding: 20px;
+  border: 2px solid #ccc;
+  border-radius: 10px;
   text-align: center;
-  font-family: sans-serif;
-  font-size: 12px;
 }
 
 .legend-title {
-  font-size: 18px;
+  font-size: 42px;
 }
 
 .legend-item {
@@ -43,9 +41,10 @@ body {
 }
 
 .legend-item .shape {
-  width: 20px;
-  height: 20px;
-  margin-right: 5px;
+  width: 50px;
+  height: 50px;
+  margin: 10px;
+  margin-left: 5px;
 }
 
 .rectangle {
@@ -66,7 +65,7 @@ body {
 }
 
 .triangle-svg {
-  width: 20px;
-  height: 20px;
+  width: 50px;
+  height: 50px;
   fill: rgb(255, 200, 0);
 }
