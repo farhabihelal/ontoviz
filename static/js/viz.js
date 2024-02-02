@@ -91,6 +91,7 @@ function createGraph(nodes, edges, style) {
         "line-color": "red", // Change this to the desired line color for edges
         "border-color": "red", // Change this to the desired border color for nodes
         "border-width": "8px", // Change this to the desired border width for nodes
+        "text-background-color": "red", // Change this to the desired text background color for nodes
       })
       .update();
   });
