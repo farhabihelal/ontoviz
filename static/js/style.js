@@ -154,11 +154,11 @@ var vizualizationStyleProfiles = {
       {
         selector: ".highlighted",
         style: {
-          "line-color": "red", // Change this to the desired line color for edges
-          "border-color": "red", // Change this to the desired border color for nodes
-          "border-width": "8px", // Change this to the desired border width for nodes
-          "text-background-color": "red", // Change this to the desired text background color for nodes
-          opacity: "1", // Change this to the desired opacity for nodes
+          "line-color": "red",
+          "border-color": "red",
+          "border-width": "8px",
+          "text-background-color": "red",
+          opacity: "1",
           "target-arrow-color": "red",
           "font-weight": "bold",
         },
@@ -166,7 +166,7 @@ var vizualizationStyleProfiles = {
       {
         selector: ".blur",
         style: {
-          opacity: "0.1", // Change this to the desired opacity for nodes
+          opacity: "0.1",
         },
       },
     ],
