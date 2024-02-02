@@ -151,6 +151,23 @@ var vizualizationStyleProfiles = {
           "font-size": "46px",
         },
       },
+      {
+        selector: ".highlighted",
+        style: {
+          "line-color": "red", // Change this to the desired line color for edges
+          "border-color": "red", // Change this to the desired border color for nodes
+          "border-width": "8px", // Change this to the desired border width for nodes
+          "text-background-color": "red", // Change this to the desired text background color for nodes
+          opacity: "1", // Change this to the desired opacity for nodes
+          "target-arrow-color": "red",
+        },
+      },
+      {
+        selector: ".blur",
+        style: {
+          opacity: "0.1", // Change this to the desired opacity for nodes
+        },
+      },
     ],
   },
 };

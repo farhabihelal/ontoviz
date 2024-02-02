@@ -66,37 +66,15 @@ function createGraph(nodes, edges, style) {
     // pan: { duration: 1000 },
   });
 
-  // Styles for the highlighted elements
-  graph
-    .style()
-    .selector(".highlighted")
-    .css({
-      "line-color": "red", // Change this to the desired line color for edges
-      "border-color": "red", // Change this to the desired border color for nodes
-      "border-width": "8px", // Change this to the desired border width for nodes
-      "text-background-color": "red", // Change this to the desired text background color for nodes
-      opacity: "1", // Change this to the desired opacity for nodes
-    })
-    .update();
-
-  // Styles for the highlighted elements
-  graph
-    .style()
-    .selector(".blur")
-    .css({
-      opacity: "0.2", // Change this to the desired opacity for nodes
-    })
-    .update();
-
   // Event listener for node click
   graph.on("click", "node", function (event) {
     // Adjust transparency for all nodes
     graph.elements().addClass("blur");
 
-    const clickedNode = event.target;
-
     // Remove highlight from previously clicked elements
     graph.elements().removeClass("highlighted");
+
+    const clickedNode = event.target;
 
     // Highlight the clicked node
     clickedNode.addClass("highlighted");
@@ -117,8 +95,7 @@ function createGraph(nodes, edges, style) {
     // Check if the tap event target is the canvas (not a node)
     if (event.target === graph) {
       // Reset styles or perform other actions for all nodes
-      graph.elements().removeClass("highlighted");
-      graph.elements().removeClass("blur");
+      graph.elements().removeClass(["highlighted", "blur"]);
     }
   });
 }
