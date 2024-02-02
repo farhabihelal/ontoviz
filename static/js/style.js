@@ -123,7 +123,7 @@ var vizualizationStyleProfiles = {
           label: "data(label)",
           "text-valign": "bottom",
           "text-halign": "center",
-          "text-margin-y": "10px",
+          "text-margin-y": "15px",
           "text-background-color": "#fff",
           "text-background-opacity": 0.0,
           "text-background-padding": "3px",

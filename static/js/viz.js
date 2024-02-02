@@ -76,18 +76,18 @@ function createGraph(nodes, edges, style) {
     // Highlight the clicked node
     clickedNode.addClass("highlighted");
 
-    // Highlight connected edges
-    clickedNode.connectedEdges().addClass("highlighted");
+    const connectedNodes = clickedNode.outgoers().nodes();
+    connectedNodes.addClass("highlighted");
 
-    // Highlight connected nodes
-    clickedNode.connectedEdges().connectedNodes().addClass("highlighted");
+    // Highlight connected edges
+    const outgoingEdges = clickedNode.outgoers().edges();
+    outgoingEdges.addClass("highlighted");
 
     // Styles for the highlighted elements
     graph
       .style()
       .selector(".highlighted")
       .css({
-        // "background-color": "yellow", // Change this to the desired background color
         "line-color": "red", // Change this to the desired line color for edges
         "border-color": "red", // Change this to the desired border color for nodes
         "border-width": "8px", // Change this to the desired border width for nodes
