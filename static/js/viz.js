@@ -1,8 +1,14 @@
+// Global Variables
+const queryServerUri = "http://localhost:8880";
+const refreshIntervalMs = 3000;
+const enableFiltering = false;
+
 var graph = null;
 var enableTest = false;
 var lastRawData = null;
 var style = vizualizationStyleProfiles["tv"];
 
+// Functions
 function generateUUID() {
   const array = new Uint32Array(4);
   window.crypto.getRandomValues(array);
@@ -190,7 +196,12 @@ function processRawData(rawData) {
   let allEdges = [];
 
   const individuals = rawData["individuals"];
-  const filteredIndividuals = filterIndividuals(rawData);
+
+  let filteredIndividuals = individuals;
+
+  if (enableFiltering) {
+    filteredIndividuals = filterIndividuals(rawData);
+  }
 
   // Create all the individual nodes first
   filteredIndividuals.forEach((individual) => {
@@ -290,7 +301,6 @@ async function getHash(inputString) {
 }
 
 async function run() {
-  const queryServerUri = "http://localhost:8880";
   let rawData = enableTest ? getTestData() : await getData(queryServerUri);
   console.log(`rawData: ${rawData}`);
 
@@ -348,11 +358,6 @@ function filterIndividuals(rawData) {
   return Object.values(filteredIndividuals);
 }
 
-(() => {
-  const refreshIntervalMs = 3000;
-  setInterval(run, refreshIntervalMs);
-})();
-
 function sortData(data) {
   if (typeof data !== "object" || data === null) {
     return data;
@@ -384,3 +389,7 @@ function resetGraph() {
   graph ? updateGraph([], [], []) : createGraph([], [], style.style);
   lastRawData = null;
 }
+
+(() => {
+  setInterval(run, refreshIntervalMs);
+})();
